@@ -1,0 +1,172 @@
+---
+title: "Example R Markdown document"
+author: "DATA 607"
+date: "9/1/2021"
+output:
+  pdf_document:
+    latex_engine : pdflatex
+    extra_dependencies: ["bbm","amsmath","amsthm","amssymb","amsopn","amsfonts","dsfont","wrapfig"]
+    includes:
+      in_header: "MyPreamble.tex"
+    number_sections: true
+  html_document: 
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# include R packages here
+library(ggplot2)
+library(MASS)
+library(tidyverse)
+library(socviz)
+```
+
+# R Markdown basics
+
+This is an example R Markdown document.  Markdown is a versatile and useful tool for creating HTML, PDF, and MS Word documents directly from *RStudio*.  For a comprehensive guide to *R Markdown,* see <https://bookdown.org/yihui/rmarkdown/>.  For a quick, handy reference, see <https://rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf>.
+
+To compile the document (including evaluating the embedded code chunks), press the **Knit** button at the top of your document in *R Studio*.  
+
+In addition to plain text which can be written directly into the file, there are special commands for writing formatted text:
+
+- For *italicize* font, use `` *italicize* `` or `` \emph{ }``
+- For **bold** font, use `` **bold** `` or `` \textbf{ }``
+- To \underline{underline} font in PDF mode, use `` \underline{ } ``
+- To change the global font size, add `` fontsize: 12pt `` into the document header
+- To change the text \textcolor{red}{color}, use ``\textcolor{red}{color}`` for PDF
+
+In addition to bulletted lists, we can make numbered lists as well:
+
+1. One
+2. Two
+3. Three
+    a. 3a
+    b. 3b
+
+There are numerous section levels you can employ in your document as well (if you do not want them numbered, set **number_sections: false** in the document header)
+
+# Single hashtag for biggest
+
+## Two hashtags for bigger
+
+### Three hashtags for big
+
+#### Four hashtags for medium
+
+## \LaTeX
+
+\LaTeX code can be included directly into your document either inline (using ``$ \LaTeX here $``) or in math mode (using ``$$ \LaTeX here $$``). For example, ``$4^5$`` produces $4^5$, while ``$$\frac{4x-3}{\log x}$$`` produces
+$$\frac{4x-3}{\log x}$$
+Note that adding additional \LaTeX package functionality into *R Markdown* documents can easily be achieved if the document is Knit to a PDF.  For example, the following compiles seamlessly via use of the \textbf{bbm} package and the commands written into the \LaTeX preamble:
+
+``$$\argmin_{\vartheta\in\bh}\Ex\left(\mathbbm{1}\{\vartheta\in S_i\}\right)$$`` 
+
+compiles to
+$$\argmin_{\vartheta\in\bh}\Ex\left(\mathbbm{1}\{\vartheta\in S_i\}\right).$$
+Note that in addition to including individual packages, you can include an entire \LaTeX preamble (with user-defined commands and additional packages) for a PDF document.
+
+## Code chunks
+
+We can include and evaluate chunks of *R* code in an *R Markdown* document as follows.
+
+````markdown
+`r ''````{r, echo=TRUE}
+4+5
+x<-7
+x+10
+```
+````
+
+This will evaluate to 
+```{r, echo=TRUE}
+4+5
+x<-7
+x+10
+```
+
+We can include graphics in our code chunks as well.
+```{r titanic, fig.width=8, fig.height=3}
+g <- ggplot(data= titanic, aes(x=sex,y=n,fill=fate))
+g+geom_bar(stat="identity",color="black",position=position_dodge())
+```
+
+There are numerous options for customizing the output of your *R* code chunk.  Some of the more useful options to include in the header of your code chunk 
+`r ''` ```{r, echo=TRUE} are
+
+- **echo=TRUE** (re. **FALSE**) to display all lines of code input
+- **eval=FALSE** (re. **TRUE**) to display but not evaluate the code input
+- **message = FALSE** suppresses the messages created by the code chunk
+- **warning = FALSE** supresses warnings created by your code chunk
+- **include = FALSE** prevents all code and output from being displayed in the knitted document
+- **fig.width=** allows us to set the width of an *R* figure
+- **fig.height=** allows us to set the width of an *R* figure
+
+## External figures and images
+
+Including locally stored, external figures and images in your document can be accomplished as follows.  The following code chunk 
+
+````markdown
+\begin{figure}
+  \includegraphics{logo.jpg}
+  \caption{UMD Logo}
+\end{figure}
+````
+
+will produce 
+
+\begin{figure}
+  \includegraphics{logo.jpg}
+  \caption{UMD Logo}
+\end{figure}
+
+We can manually start a new page by using the ``\newpage`` command.
+\newpage
+
+We can also move the text around, and wrap font around the text in an *R Markdown* document.  This can be achieved using the example code chunk.  Note that this is a bit easier when knitting to PDF (in which case, you need to delete the code chunks displaying the images in HTML). 
+
+````markdown
+\begin{wrapfigure}{R}{0.5\textwidth}
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{logo.jpg}
+  \caption{UMD Logo}
+\end{center}
+\end{wrapfigure}
+````
+
+\begin{wrapfigure}{R}{0.5\textwidth}
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{logo.jpg}
+  \caption{UMD Logo}
+\end{center}
+\end{wrapfigure}
+
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later. (These text repeats are here to show the effect of figure wrapping).
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later. 
+
+````markdown
+\begin{wrapfigure}{L}{0.5\textwidth}
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{logo.jpg}
+  \caption{UMD Logo}
+\end{center}
+\end{wrapfigure}
+````
+
+\begin{wrapfigure}{L}{0.5\textwidth}
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{logo.jpg}
+  \caption{UMD Logo}
+\end{center}
+\end{wrapfigure}
+
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later. (These text repeats are here to show the effect of figure wrapping).
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later.
+\LaTeX has numerous figure options that allow for easy customization of figure size and location.  We will touch more on these later. 

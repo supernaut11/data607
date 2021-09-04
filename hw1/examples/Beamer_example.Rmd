@@ -1,0 +1,82 @@
+---
+title: "Example Beamer Document"
+author: "Vince Lyzinski"
+date: 
+output:
+  beamer_presentation:
+    keep_tex: no
+    theme: metropolis
+    slide_level: 2
+    incremental: no
+fontsize: 10pt
+classoption: compress
+header-includes:
+  \setbeamercolor{frametitle}{bg=gray}
+  \hypersetup{colorlinks,citecolor=orange,filecolor=red,linkcolor=brown,urlcolor=blue}
+  \usepackage{amsmath,color,amsthm,amssymb,pdfpages,algorithm2e,dsfont}
+  \newcommand{\vv}{\vspace{2mm}}
+  \newcommand{\p}{\mathbb{P}}
+  \newcommand{\e}{\mathbb{E}}
+  \newcommand{\etr}{\overline{\text{err}}}
+  \newcommand{\ete}{\text{Err}_{\mathcal{T}}}
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(dev = 'pdf')
+```
+
+```{r wrap-hook}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+```
+
+## Slide name here
+
+You can include text, or math equations
+$$ 4^2-\frac{3}{\sqrt{n}}$$
+and R code chunks
+```{r, echo=TRUE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
+library(dslabs)
+library(class)
+tr<-cbind(mnist_27$train$x_1,mnist_27$train$x_2)
+te<-cbind(mnist_27$test$x_1,mnist_27$test$x_2)
+k3<-knn(tr,te, mnist_27$train$y,3)
+sum(k3==mnist_27$test$y)/length(mnist_27$test$y)
+```
+
+## Slide name here
+Lists are a bit different
+
+- but they
+- are easy to 
+- implement
+
+**Bold** and *italicized* text is easy, as is
+
+ \vspace{2mm}
+ 
+ adding space
+ 
+## Plots in R
+
+Adding R plots is easy
+```{r, echo=TRUE, fig.width = 10, fig.height=5.5}
+plot(cars$speed,cars$dist,xlab="Speed",ylab="Stopping Dist.")
+```
+
+## Outside graphics
+Outside figures are not too different...
+
+\includegraphics[width=1\textwidth]{logo}
