@@ -1,0 +1,118 @@
+---
+title: "Understanding Bayesian Credible Intervals"
+author: "Mike Dehn"
+date: "10/13/2021"
+output:
+  pdf_document:
+    latex_engine : pdflatex
+    includes:
+      in_header: "preamble.tex"
+    number_sections: true
+---
+
+# Introduction
+
+In this tutorial, we will explore the idea of Bayesian credible intervals. For complete
+context, we begin with an introduction to both the frequentist and Bayesian approaches to
+statistical thinking. We further consider the concept of confidence and credible intervals
+in each approach. Once this conceptual foundation is established, we will walk through an
+example of applying these concepts to real world data.
+
+## Frequentist vs. Bayesian Statistical Inference
+
+Assume that there is a parameter, \phi , that we would like to estimate for a population.
+As an example, you might consider the average age of the people living in the United States.
+While the United States collects thorough census data on a recurring basis, it is very difficult
+to know whether the data are complete. Some people may not respond to the census, others may
+be dishonest in their responses. The key is, we cannot know the value of \phi with absolute 
+certainty; we must estimate based on the data available to us. Statistical inference is a process 
+that allows us to build these estimates based on the data we have about a given population.
+
+There are two primary approaches to statistical inference: frequentist and Bayesian. In 
+frequentist statistics, samples from a population are used to estimate the value of the 
+parameter in question, but we do not assume that parameter is a random variable. Instead,
+we assume that the parameter has a fixed but unknown value that is not stochastic in
+nature. A frequentist might say, "the probability that the average age of people in the 
+United States is 30 years old is either 0% or 100%, I just don't know which one is correct."
+
+Conversely, in Bayesian statistics, the parameter in question is assumed to be a random
+variable. A Bayesian statistician might say, "the probability that the average age of
+people in the United States is 30 years old is X%, based on what we know from population
+data that we have on hand." The Bayesian statistician can provide a more precise estimate
+of the probability of a particular value for \phi, while the frequentist cannot. Note that
+this does not necessarily imply that the Bayesian is more accurate!
+
+NOTE: If further explanation is helpful, there is an excellent article and video on the
+Towards Data Science website that provides an intuitive explanation of the differences 
+between Bayesian and frequentist statistics:
+https://towardsdatascience.com/statistics-are-you-bayesian-or-frequentist-4943f953f21b
+
+Both forms of statistical inference are rife with uncertainty. We do not _know_ the true
+value of \phi based on our statistical procedures; what we _do have_ is an estimate with
+an established level of uncertainty. In frequentist statistics, this certainty is 
+described using confidence intervals. Bayesian statistics uses the related, but different,
+credible interval.
+
+### Frequentist Confidence Intervals
+
+The frequentist notion of confidence intervals is generally well-known in most communities
+with some degree of statistical sophistication, but are often misunderstood. In particular,
+the meaning of the confidence level is perhaps the most confusing. Many people incorrectly
+believe that a confidence interval is a range of values that contain the estimated parameter
+with a probability equal to the confidence level. In other words, if the 95% confidence
+interval for \phi is such that 25 <= \phi <=35, it is tempting to assert that there is a
+95% probability that \phi lies between 25-35. You may be asking, "why isn't this true?"
+
+As explained in the previous section of this tutorial, frequentist statistics does not assign 
+probabilities to parameter estimates - frequentists assume that the _true_ value of the 
+parameter is not a random variable, rather it is an unknown non-stochastic value. 
+
+What, then, does a confidence level signify? The definition is not straightforward: "a confidence 
+level represents the theoretical long-run frequency (i.e., the proportion) of confidence 
+intervals that contain the true value of the unknown population parameter."
+
+This is a little confusing, so let's break it down. In practical terms, this definition says:
+Let's imagine we can run the same experiment over and over again. If you do, in the long-run, you'll 
+find that the percentage of confidence intervals that contain \phi tends toward the confidence
+level percentage we selected. For a 90% confidence level, 90% of confidence intervals derived
+from repeats of this experiement will contain the true value of \phi.
+
+If this doesn't feel super satisfying to you, you aren't alone. The frequentist confidence
+interval sidesteps assigning a probability to the true value of \phi in favor of making an
+assertion with the confidence we can have as a result of the experiment itself.
+
+### Bayesian Credible Intervals
+
+So, is there a way to establish the more intuitive notion of a probability estimate for the
+value of \phi itself within an interval? If you are a Bayesian statistician, the answer is "yes."
+
+Bayesian inference uses the notion of _credible intervals_ to assign a probability that
+the estimated parameter \phi lies within an established range. When we calculate the 95% credible
+interval for a sample, we assert that the probability of the true value of \phi resides in
+the given interval is 95%, given the data available to us.
+
+This definition speaks to many peoples' intuition about what an estimate interval _ought_ to be.
+It maps well to our understanding of probability as an estimation of what we think is true, while
+providing an objective accounting for our uncertainty in the estimate.
+
+Although credible intervals are more intuitively understood than their frequentist counterparts, 
+they do have some undesirable characteristics. For example, they require us to make assumptions 
+about a prior distribution. They also require us to construct posterior distribution, which can 
+be computationally expensive.
+
+# Learning by Example with Real World Data
+
+With this foundational introduction, let us continue with a concrete example of calculating a
+credible interval for a data set in R.
+
+
+
+## Ingesting Data
+
+## Calculating Credible Interval
+
+## Plotting Credible Interval
+
+## Interpreting the Credible Interval
+
+# Conclusions
