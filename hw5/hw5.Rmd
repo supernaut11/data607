@@ -2,12 +2,7 @@
 title: "Understanding Bayesian Credible Intervals"
 author: "Mike Dehn"
 date: "10/13/2021"
-output:
-  pdf_document:
-    latex_engine : pdflatex
-    includes:
-      in_header: "preamble.tex"
-    number_sections: true
+output: html_document
 ---
 
 # Introduction
@@ -20,27 +15,30 @@ example of applying these concepts to real world data.
 
 ## Frequentist vs. Bayesian Statistical Inference
 
-Assume that there is a parameter, \phi , that we would like to estimate for a population.
-As an example, you might consider the average age of the people living in the United States.
-While the United States collects thorough census data on a recurring basis, it is very difficult
-to know whether the data are complete. Some people may not respond to the census, others may
-be dishonest in their responses. The key is, we cannot know the value of \phi with absolute 
-certainty; we must estimate based on the data available to us. Statistical inference is a process 
-that allows us to build these estimates based on the data we have about a given population.
+Assume that there is a parameter, $\phi$, that we would like to estimate for a
+population. As an example, you might consider the average age of the people 
+living in the United States. While the United States collects thorough census 
+data on a recurring basis, it is very difficult to know whether the data are 
+complete. Some people may not respond to the census, others may be dishonest in 
+their responses. The key is, we cannot know the value of $\phi$ with absolute 
+certainty; we must estimate based on the data available to us. Statistical 
+inference is a process that allows us to build these estimates based on the data
+we have about a given population.
 
 There are two primary approaches to statistical inference: frequentist and Bayesian. In 
 frequentist statistics, samples from a population are used to estimate the value of the 
 parameter in question, but we do not assume that parameter is a random variable. Instead,
 we assume that the parameter has a fixed but unknown value that is not stochastic in
 nature. A frequentist might say, "the probability that the average age of people in the 
-United States is 30 years old is either 0% or 100%, I just don't know which one is correct."
+United States is 30 years old is either 0% or 100%, I just don't know which one is 
+correct."
 
 Conversely, in Bayesian statistics, the parameter in question is assumed to be a random
 variable. A Bayesian statistician might say, "the probability that the average age of
 people in the United States is 30 years old is X%, based on what we know from population
 data that we have on hand." The Bayesian statistician can provide a more precise estimate
-of the probability of a particular value for \phi, while the frequentist cannot. Note that
-this does not necessarily imply that the Bayesian is more accurate!
+of the probability of a particular value for $\phi$, while the frequentist cannot. Note 
+that this does not necessarily imply that the Bayesian is more accurate!
 
 NOTE: If further explanation is helpful, there is an excellent article and video on the
 Towards Data Science website that provides an intuitive explanation of the differences 
@@ -48,71 +46,282 @@ between Bayesian and frequentist statistics:
 https://towardsdatascience.com/statistics-are-you-bayesian-or-frequentist-4943f953f21b
 
 Both forms of statistical inference are rife with uncertainty. We do not _know_ the true
-value of \phi based on our statistical procedures; what we _do have_ is an estimate with
-an established level of uncertainty. In frequentist statistics, this certainty is 
-described using confidence intervals. Bayesian statistics uses the related, but different,
-credible interval.
+value of $\phi$ based on our statistical procedures; what we _do have_ is an estimate 
+with an established level of uncertainty. In frequentist statistics, this certainty is 
+described using confidence intervals. Bayesian statistics uses the related, but 
+different, credible interval.
 
 ### Frequentist Confidence Intervals
 
-The frequentist notion of confidence intervals is generally well-known in most communities
-with some degree of statistical sophistication, but are often misunderstood. In particular,
-the meaning of the confidence level is perhaps the most confusing. Many people incorrectly
-believe that a confidence interval is a range of values that contain the estimated parameter
-with a probability equal to the confidence level. In other words, if the 95% confidence
-interval for \phi is such that 25 <= \phi <=35, it is tempting to assert that there is a
-95% probability that \phi lies between 25-35. You may be asking, "why isn't this true?"
+The frequentist notion of confidence intervals is generally well-known in most 
+communities with some degree of statistical sophistication, but are often misunderstood. 
+In particular, the meaning of the confidence level is perhaps the most confusing. Many 
+people incorrectly believe that a confidence interval is a range of values that contain 
+the estimated parameter with a probability equal to the confidence level. In other words,
+if the 95% confidence interval for $\phi$ is such that 25 <= $\phi$ <=35, it is tempting
+to assert that there is a 95% probability that $\phi$ lies between 25-35. You may be 
+asking, "why isn't this true?"
 
-As explained in the previous section of this tutorial, frequentist statistics does not assign 
-probabilities to parameter estimates - frequentists assume that the _true_ value of the 
-parameter is not a random variable, rather it is an unknown non-stochastic value. 
+As explained in the previous section of this tutorial, frequentist statistics does not 
+assignprobabilities to parameter estimates - frequentists assume that the _true_ value of
+the parameter is not a random variable, rather it is an unknown non-stochastic value. 
 
-What, then, does a confidence level signify? The definition is not straightforward: "a confidence 
-level represents the theoretical long-run frequency (i.e., the proportion) of confidence 
-intervals that contain the true value of the unknown population parameter."
+What, then, does a confidence level signify? The definition is not straightforward: "a 
+confidence level represents the theoretical long-run frequency (i.e., the proportion) of 
+confidence intervals that contain the true value of the unknown population parameter."
 
-This is a little confusing, so let's break it down. In practical terms, this definition says:
-Let's imagine we can run the same experiment over and over again. If you do, in the long-run, you'll 
-find that the percentage of confidence intervals that contain \phi tends toward the confidence
-level percentage we selected. For a 90% confidence level, 90% of confidence intervals derived
-from repeats of this experiement will contain the true value of \phi.
+This is a little confusing, so let's break it down. In practical terms, this definition 
+says: Let's imagine we can run the same experiment over and over again. If you do, in the
+long-run, you'll find that the percentage of confidence intervals that contain $\phi$ 
+tends toward the confidence level percentage we selected. For a 90% confidence level, 90%
+of confidence intervals derived from repeats of this experiement will contain the true 
+value of $\phi$.
 
-If this doesn't feel super satisfying to you, you aren't alone. The frequentist confidence
-interval sidesteps assigning a probability to the true value of \phi in favor of making an
-assertion with the confidence we can have as a result of the experiment itself.
+If this doesn't feel super satisfying to you, you aren't alone. The frequentist 
+confidence interval sidesteps assigning a probability to the true value of $\phi$ in 
+favor of making an assertion with the confidence we can have as a result of the 
+experiment itself.
 
 ### Bayesian Credible Intervals
 
-So, is there a way to establish the more intuitive notion of a probability estimate for the
-value of \phi itself within an interval? If you are a Bayesian statistician, the answer is "yes."
+So, is there a way to establish the more intuitive notion of a probability estimate for 
+the value of $\phi$ itself within an interval? If you are a Bayesian statistician, the 
+answer is "yes."
 
 Bayesian inference uses the notion of _credible intervals_ to assign a probability that
-the estimated parameter \phi lies within an established range. When we calculate the 95% credible
-interval for a sample, we assert that the probability of the true value of \phi resides in
-the given interval is 95%, given the data available to us.
+the estimated parameter $\phi$ lies within an established range. When we calculate the 
+95% credible interval for a sample, we assert that the probability of the true value of 
+$\phi$ resides in the given interval is 95%, given the data available to us.
 
-This definition speaks to many peoples' intuition about what an estimate interval _ought_ to be.
-It maps well to our understanding of probability as an estimation of what we think is true, while
-providing an objective accounting for our uncertainty in the estimate.
+This definition speaks to many peoples' intuition about what an estimate interval _ought_
+to be. It maps well to our understanding of probability as an estimation of what we think
+is true, while providing an objective accounting for our uncertainty in the estimate.
 
-Although credible intervals are more intuitively understood than their frequentist counterparts, 
-they do have some undesirable characteristics. For example, they require us to make assumptions 
-about a prior distribution. They also require us to construct posterior distribution, which can 
-be computationally expensive.
+Although credible intervals are more intuitively understood than their frequentist 
+counterparts, they do have some undesirable characteristics. For example, they require us
+to make assumptions about a prior distribution. They also require us to construct 
+posterior distribution, which can be computationally expensive.
 
 # Learning by Example with Real World Data
 
-With this foundational introduction, let us continue with a concrete example of calculating a
-credible interval for a data set in R.
+With this foundational introduction, let us continue with a concrete example of 
+calculating a credible interval for a data set in R. In this example, we will use a data 
+set collected by the United States Center for Disease Control (CDC) as part of their
+National Health and Nutrition Examination Survey for calendar years 2017-2020.
+In particular, we will establish a credible interval for the average BMI of 
+adult males in the United States.
 
-
+One advantage to using this data set and estimating the mean BMI parameter is
+that it is a well-studied parameter within the healthcare community. Therefore,
+we can establish some intuition as to the accuracy of our result.
 
 ## Ingesting Data
 
+The data set can be downloaded from the CDC's website. There are two files that 
+we need to download:
+
+  * Body measures - https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/P_BMX.XPT
+  * Demographics - https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/P_DEMO.XPT
+
+The body measures data contains height, weight, BMI, and related metrics for each
+participant in the survey. The demographics data provides various biographical
+data for each participant, which we will use to filter only for adult males. 
+According to the CDC's website, the data set considers "adults" to be age 20 or
+higher at the time of their measurements.
+
+We can programmatically download the data set from the CDC's website using the
+code below. If this snippet does not work for you, try downloading the data 
+manually.
+
+```{r}
+curl::curl_download('https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/P_BMX.XPT', 
+                    'body_measures.xpt')
+
+curl::curl_download('https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/P_DEMO.XPT', 
+                    'demographics.xpt')
+```
+
+You should now have two files in your working directory - `body_measures.xpt`
+and `demographics.xpt`. The data are in a non-human readable data format, but 
+they can be ingested using the `haven` R package.
+
+```{r message=FALSE}
+library(tidyverse)
+library(haven)
+body_measures <- read_xpt('body_measures.xpt')
+demographics <- read_xpt('demographics.xpt')
+```
+
+Now that we have ingested the body measures data set, we should check that the 
+results make sense. Let's take a look at a summary of the data set.
+
+```{r}
+summary(body_measures)
+```
+
+The most important variable in this data set is the BMXBMI variable, which 
+corresponds to the BMI calculated for each individual under observation in the
+survey. We can see that there are 1,163 rows containing `NA` values for this
+variable. In our calculations, we will simply reject any rows containing `NA`
+for the BMXBMI variable, but it is important for us to remember this in the
+context of describing any uncertainty in our final result.
+
+The code snippet below will perform this cleaning for us.
+
+```{r}
+library(dplyr)
+body_measures_clean <- filter(body_measures, ! is.na(BMXBMI))
+```
+
+We no longer have any `NA` values in the BMI field, so we have rejected any samples
+that may be problematic for our parameter estimation. However, we have not yet
+selected for the specific population of interest: 20+ year old males.
+
+To select on this particular subset of the population, we can join the `body_measures`
+and `demographics` data set on their common column `SEQN` that uniquely identifies
+a participant. We then filter any rows do not satisfy the criteria of being males
+of age 20 or greater.
+
+```{r}
+attributed_data <- merge(body_measures_clean, demographics, by = 'SEQN')
+adult_male_data <- filter(attributed_data, RIAGENDR == 1, RIDAGEYR >= 20)
+```
+
+This gives us a data set limited only to adult males in the United States. The
+data set has been reduced from its original size of around 13,137 to 4,051
+samples, but we have eliminated groups that may make our results harder to 
+interpret.
+
+Using the code snippet below, we plot the posterior distribution of these data.
+
+```{r}
+library(bayestestR)
+
+posterior <- adult_male_data$BMXBMI
+
+posterior_dist <- posterior %>% 
+  estimate_density(extend=TRUE)
+
+posterior_dist %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_area(fill = "orange") +
+  theme_classic() +
+  xlab("BMI")
+```
+
 ## Calculating Credible Interval
 
-## Plotting Credible Interval
+We will use the `bayestestR` package to calculate the credible interval for our
+data set. Credible intervals can be calculated using several approaches. In this
+tutorial, we will calculate credible intervals using two methods: highest density
+interval (HDI) and equal-tailed interval (ETI).
 
-## Interpreting the Credible Interval
+The HDI approach centers the credible interval around the highest density region
+of the posterior distribution. This means that all possible values for the 
+estimated parameter $\phi$ have the lower probability outside of the interval
+than inside.
+
+The ETI approach ensures that the area of the posterior distribution outside the
+credible interval (i.e., the tails) are equal. In skewed distributions, this may
+cause the probability of parameter values inside the credible interval to be lower 
+than some values outside the interval, which is not typically desirable.
+
+We use the code snippet below to generate both HDI and ETI credible intervals for
+the CDC data set.
+
+```{r}
+(ci_hdi <- ci(adult_male_data$BMXBMI, method = "HDI", ci = 0.89))
+```
+```{r}
+(ci_eti <- ci(adult_male_data$BMXBMI, method = "ETI", ci = 0.89))
+```
+As we can see from the results above, the credible interval values are slightly
+different between the HDI and ETI approaches, with the ETI skewing higher due
+to significant outliers to the right of the posterior distribution. This is 
+illustrated in the figure below, where the blue lines bound the HDI credible
+interval, and the red lines bound the ETI credible interval.
+
+```{r}
+posterior_dist %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_area(fill = "orange") +
+  theme_classic() +
+  # HDI in blue
+  geom_vline(xintercept = ci_hdi$CI_low, color = "royalblue", size = 2) +
+  geom_vline(xintercept = ci_hdi$CI_high, color = "royalblue", size = 2) +
+  # Quantile in red
+  geom_vline(xintercept = ci_eti$CI_low, color = "red", size = 1) +
+  geom_vline(xintercept = ci_eti$CI_high, color = "red", size = 1) +
+  xlab("BMI") +
+  ylab("")
+```
+
+## Exploring Support Intervals
+
+The distribution of BMI within the United States among adult males is a well-studied
+problem in the medical community. Given this, we can make an informed guess about
+the prior distribution of the BMI of adult males.
+
+According to https://pubmed.ncbi.nlm.nih.gov/23675464/ the mean BMI for adult males
+in the United States was 29.0 with a standard deviation of 4.73. We will assume
+that the BMI values are normally distributed in the prior distribution.
+
+The code snippet below shows how the prior distribution described appears when
+overlaid on the posterior distribution from our sample.
+
+```{r}
+prior <- distribution_normal(1024, mean = 29.0, sd = 4.73)
+
+posterior_dist %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_area(fill = "orange") +
+  theme_classic() +
+  geom_area(color = "black", fill = NA, size = 1, linetype = "dashed",
+            data = estimate_density(prior, extend = TRUE)) +
+  xlab("BMI") +
+  ylab("")
+```
+
+From visual inspection we observe that the posterior distribution is similar to
+the prior distribution. However, the distributions have several differences. For
+example, the posterior has higher density concentrated towards the right tail of
+the distribution.
+
+Support intervals are useful in this scenario for determining which intervals
+have gained support beyond a defined factor, _k_. The snipped of code below uses
+the `si` function to calculate support intervals for the posterior distribution
+where $k = 3$.
+
+```{r}
+si_3 <- si(posterior, prior, BF = 3)
+
+posterior_dist %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_area(fill = "orange") +
+  theme_classic() +
+  geom_area(color = "black", fill = NA, size = 1, linetype = "dashed",
+            data = estimate_density(prior, extend = TRUE)) +
+  # BF = 3 SI in red
+  geom_vline(xintercept = si_3$CI_low, color = "red", size = 1) +
+  geom_vline(xintercept = si_3$CI_high, color = "red", size = 1) +
+  xlab("BMI") +
+  ylab("")
+```
+
+From these results, we can see that the support interval $(40.8, 69.6)$ has
+received additional support for $k = 3$.
+
+We can interpret this result as a suggestion that is strong evidence to support
+the BMIs significantly higher than the mean are more likely than might be 
+suggested by our prior normal distribution.
 
 # Conclusions
+
+In this tutorial, we have covered the concepts of both confidence and credible
+intervals. We showed that the less known Bayesian credible interval has a more
+intuitive definition than that of the frequentist confidence interval. Through
+examination of a CDC data set, we established a credible interval for the mean
+BMI of adult males in the United States. We also showed how establishing a
+reasonable prior distribution allows to use support intervals to make inferences
+about how the evidence for certain parameter values changes through observations
+of sample data.
