@@ -3,6 +3,7 @@ title: "Understanding Bayesian Credible Intervals"
 author: "Mike Dehn"
 date: "10/13/2021"
 output: html_document
+bibliography: references.bib
 ---
 
 # Introduction
@@ -16,27 +17,26 @@ example of applying these concepts to real world data.
 ## Frequentist vs. Bayesian Statistical Inference
 
 Assume that there is a parameter, $\phi$, that we would like to estimate for a
-population. As an example, you might consider the average age of the people 
-living in the United States. While the United States collects thorough census 
-data on a recurring basis, it is very difficult to know whether the data are 
-complete. Some people may not respond to the census, others may be dishonest in 
-their responses. The key is, we cannot know the value of $\phi$ with absolute 
-certainty; we must estimate based on the data available to us. Statistical 
-inference is a process that allows us to build these estimates based on the data
-we have about a given population.
+population. As an example, you might consider the average Body Mass Index (BMI) of adult males in
+the United States. While the United States has a robust medical system and plentiful
+medical data, it is impossible to collect all of this information for every person
+in the country. There are privacy concerns associated with medical data, and not
+every person has access to medical professionals. Clearly, we cannot know the value of 
+$\phi$ with absolute certainty in this example; we must estimate $\phi$ based on the data 
+available to us. __Statistical inference__ is a process that allows us to build these 
+estimates based on the data we have about a given population.
 
-There are two primary approaches to statistical inference: frequentist and Bayesian. In 
-frequentist statistics, samples from a population are used to estimate the value of the 
-parameter in question, but we do not assume that parameter is a random variable. Instead,
-we assume that the parameter has a fixed but unknown value that is not stochastic in
-nature. A frequentist might say, "the probability that the average age of people in the 
-United States is 30 years old is either 0% or 100%, I just don't know which one is 
+There are two primary approaches to statistical inference: __frequentist__ and __Bayesian__. In 
+frequentist statistics, samples from a population are used to estimate the value of 
+$\phi$, but we do not assume that parameter is a random variable. Instead,
+we assume that $\phi$ has a fixed but unknown value that is not stochastic in
+nature. A frequentist might say, "the probability that the average BMI of adult males in the 
+United States is 20.0 is either 0% or 100%, I just don't know which one is 
 correct."
 
-Conversely, in Bayesian statistics, the parameter in question is assumed to be a random
-variable. A Bayesian statistician might say, "the probability that the average age of
-people in the United States is 30 years old is X%, based on what we know from population
-data that we have on hand." The Bayesian statistician can provide a more precise estimate
+Conversely, in Bayesian statistics, $\phi$ is assumed to be a random
+variable. A Bayesian statistician might say, "the probability that the average BMI of adult males in the United States is 20.0 is $X%$, based on what we know from the
+data available to us." The Bayesian statistician can provide a more precise estimate
 of the probability of a particular value for $\phi$, while the frequentist cannot. Note 
 that this does not necessarily imply that the Bayesian is more accurate!
 
@@ -46,40 +46,37 @@ between Bayesian and frequentist statistics:
 https://towardsdatascience.com/statistics-are-you-bayesian-or-frequentist-4943f953f21b
 
 Both forms of statistical inference are rife with uncertainty. We do not _know_ the true
-value of $\phi$ based on our statistical procedures; what we _do have_ is an estimate 
-with an established level of uncertainty. In frequentist statistics, this certainty is 
-described using confidence intervals. Bayesian statistics uses the related, but 
-different, credible interval.
+value of $\phi$ based on statistical procedures; all we have is an _estimate_ 
+with an established level of uncertainty. In frequentist statistics, this uncertainty is 
+described using __confidence intervals__. Bayesian statistics uses the related, but 
+different, __credible interval__.
 
 ### Frequentist Confidence Intervals
 
 The frequentist notion of confidence intervals is generally well-known in most 
 communities with some degree of statistical sophistication, but are often misunderstood. 
-In particular, the meaning of the confidence level is perhaps the most confusing. Many 
-people incorrectly believe that a confidence interval is a range of values that contain 
-the estimated parameter with a probability equal to the confidence level. In other words,
-if the 95% confidence interval for $\phi$ is such that 25 <= $\phi$ <=35, it is tempting
-to assert that there is a 95% probability that $\phi$ lies between 25-35. You may be 
-asking, "why isn't this true?"
+Each confidence interval is calculated according to the desired __confidence level__ is perhaps the most confusing. Misinterpretation of the confidence level is primarily responsible for much of the confusion around confidence intervals. A common misconception is that a confidence interval is a range of values that contain $\phi$ with a probability equal to the confidence level. In other words,
+if the 95% confidence interval for $\phi$ is such that $\phi \in (25, 35)$, it is tempting, but incorrect, to assert that $P(\phi \in (25,35)) = 0.95$.
+
+You may be asking, "why isn't this true?"
 
 As explained in the previous section of this tutorial, frequentist statistics does not 
-assignprobabilities to parameter estimates - frequentists assume that the _true_ value of
-the parameter is not a random variable, rather it is an unknown non-stochastic value. 
+assign probabilities to parameter estimates - frequentists assume that the _true_ value of $\phi$ is not a random variable, rather it is an unknown non-stochastic value. 
 
 What, then, does a confidence level signify? The definition is not straightforward: "a 
 confidence level represents the theoretical long-run frequency (i.e., the proportion) of 
-confidence intervals that contain the true value of the unknown population parameter."
+confidence intervals that contain the true value of the unknown population parameter." [@wiki_confidence_interval]
 
-This is a little confusing, so let's break it down. In practical terms, this definition 
+In practical terms, this definition 
 says: Let's imagine we can run the same experiment over and over again. If you do, in the
 long-run, you'll find that the percentage of confidence intervals that contain $\phi$ 
 tends toward the confidence level percentage we selected. For a 90% confidence level, 90%
-of confidence intervals derived from repeats of this experiement will contain the true 
+of confidence intervals derived from repeats of this experiment will contain the true 
 value of $\phi$.
 
 If this doesn't feel super satisfying to you, you aren't alone. The frequentist 
 confidence interval sidesteps assigning a probability to the true value of $\phi$ in 
-favor of making an assertion with the confidence we can have as a result of the 
+favor of making an assertion about the confidence we can have in the result of the 
 experiment itself.
 
 ### Bayesian Credible Intervals
@@ -88,32 +85,44 @@ So, is there a way to establish the more intuitive notion of a probability estim
 the value of $\phi$ itself within an interval? If you are a Bayesian statistician, the 
 answer is "yes."
 
-Bayesian inference uses the notion of _credible intervals_ to assign a probability that
+Bayesian inference uses the notion of credible intervals to assign a probability that
 the estimated parameter $\phi$ lies within an established range. When we calculate the 
 95% credible interval for a sample, we assert that the probability of the true value of 
-$\phi$ resides in the given interval is 95%, given the data available to us.
+$\phi$ resides in the given interval is 95%, given the data available to us. [@wiki_credible_interval]
 
 This definition speaks to many peoples' intuition about what an estimate interval _ought_
 to be. It maps well to our understanding of probability as an estimation of what we think
 is true, while providing an objective accounting for our uncertainty in the estimate.
 
 Although credible intervals are more intuitively understood than their frequentist 
-counterparts, they do have some undesirable characteristics. For example, they require us
-to make assumptions about a prior distribution. They also require us to construct 
-posterior distribution, which can be computationally expensive.
+counterparts, they do have some undesirable characteristics. For example, they require us to construct a posterior distribution, which can be computationally expensive.
 
 # Learning by Example with Real World Data
 
-With this foundational introduction, let us continue with a concrete example of 
+With this foundation, let us continue with a concrete example of 
 calculating a credible interval for a data set in R. In this example, we will use a data 
 set collected by the United States Center for Disease Control (CDC) as part of their
-National Health and Nutrition Examination Survey for calendar years 2017-2020.
-In particular, we will establish a credible interval for the average BMI of 
-adult males in the United States.
+National Health and Nutrition Examination Survey for calendar years 2017-2018.
+Using these data, we will establish a credible interval for the average BMI of 
+adult males in the United States. [@cdc_data]
 
 One advantage to using this data set and estimating the mean BMI parameter is
 that it is a well-studied parameter within the healthcare community. Therefore,
 we can establish some intuition as to the accuracy of our result.
+
+## Prerequisites
+
+Make sure you have R installed on your workstation, as well as the following
+packages:
+
+  * `tidyverse`
+  * `haven`
+  * `dplyr`
+  * `ggplot2`
+  * `bayestestR`
+  
+All of these packages can be installed from the R console using the `install.packages` command.
+  
 
 ## Ingesting Data
 
@@ -159,7 +168,7 @@ results make sense. Let's take a look at a summary of the data set.
 summary(body_measures)
 ```
 
-The most important variable in this data set is the BMXBMI variable, which 
+The most important variable in this data set is the `BMXBMI` variable, which 
 corresponds to the BMI calculated for each individual under observation in the
 survey. We can see that there are 1,163 rows containing `NA` values for this
 variable. In our calculations, we will simply reject any rows containing `NA`
@@ -256,15 +265,28 @@ posterior_dist %>%
   ylab("")
 ```
 
+From these results, we can infer that the true mean BMI lies within these confidence
+intervals with probability 0.89. In other words:
+
+  * $0.89 \text{ HDI} \rightarrow P(\phi \in [19.30, 38.30]\text{ }|\text{ data})=0.89$
+  * $0.89 \text{ ETI} \rightarrow P(\phi \in [20.90, 41.00]\text{ }|\text{ data})=0.89$
+
+We must note that there are limitations associated
+with this estimate, including that we had several samples that were dropped due to
+`NA` values, and that the CDC data collection method is very complex and technically
+requires additional processing outside the scope of this tutorial to produce nationally
+representative analysis.
+
 ## Exploring Support Intervals
 
 The distribution of BMI within the United States among adult males is a well-studied
 problem in the medical community. Given this, we can make an informed guess about
 the prior distribution of the BMI of adult males.
 
-According to https://pubmed.ncbi.nlm.nih.gov/23675464/ the mean BMI for adult males
-in the United States was 29.0 with a standard deviation of 4.73. We will assume
-that the BMI values are normally distributed in the prior distribution.
+According to a research article from 2013, the mean BMI for adult males in the
+United States was 29.0 with a standard deviation of 4.73. We will assume that the
+BMI values are normally distributed in the prior distribution.  
+[@block_subramanian_christakis_omalley_2013]
 
 The code snippet below shows how the prior distribution described appears when
 overlaid on the posterior distribution from our sample.
@@ -288,7 +310,7 @@ example, the posterior has higher density concentrated towards the right tail of
 the distribution.
 
 Support intervals are useful in this scenario for determining which intervals
-have gained support beyond a defined factor, _k_. The snipped of code below uses
+have gained support beyond a defined factor, $k$. The snipped of code below uses
 the `si` function to calculate support intervals for the posterior distribution
 where $k = 3$.
 
@@ -325,3 +347,5 @@ BMI of adult males in the United States. We also showed how establishing a
 reasonable prior distribution allows to use support intervals to make inferences
 about how the evidence for certain parameter values changes through observations
 of sample data.
+
+# References
