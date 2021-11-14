@@ -1,0 +1,66 @@
+---
+title: "DATA607 - Week 10 Homework"
+author: "Mike Dehn"
+date: "11/18/2021"
+output:
+  pdf_document:
+    latex_engine : pdflatex
+    number_sections: true
+---
+
+```{r setup}
+library("caret")
+library("curl")
+library("randomForest")
+library("tidyverse")
+```
+
+```{r}
+connection <- curl::curl(
+    "https://s3.amazonaws.com/notredame.analytics.data/mushrooms.csv")
+raw_data <- read_csv(connection)
+```
+
+```{r}
+# Transform raw data into factorized columns. Also change type column into
+# binary field where 0 = edible; 1 = poisonous
+mushrooms <- raw_data %>%
+    select(type, odor, cap_shape, cap_color, gill_attachment) %>%
+    mutate_all(as.factor) %>%
+    mutate(type = as.integer(type) - 1) %>%
+    mutate(type = as.factor(type)) %>%
+    na.exclude
+
+# Set up training data with a 70/30 split
+set.seed(1)
+num_train <- floor(nrow(mushrooms) * 0.7)
+train_idx <- sample(nrow(mushrooms), num_train)
+train_data <- mushrooms[train_idx, ]
+test_data <- mushrooms[-train_idx, ]
+
+# Build logistic regression model and collect profiling info
+Rprof()
+lr_model <- glm(type ~ ., data = train_data, family = "binomial")
+Rprof(NULL)
+lr_train_time <- summaryRprof()$by.total$total.time[1]
+
+# Make predictions with logisitic regression model
+lr_pred <- predict(lr_model, test_data, type = "response")
+lr_pred <- ifelse(predictions < 0.5, "0", "1")
+
+confusionMatrix(table(lr_pred, mushrooms$type[-train_idx]), positive = "1")
+
+# Build random forest model and collect profiling info
+Rprof()
+rf_model <- randomForest(type ~ ., data = train_data)
+Rprof(NULL)
+rf_train_time <- summaryRprof()$by.total$total.time[1]
+
+# Make predictions with random forest model
+rf_pred <- predict(rf_model, test_data, type = "class")
+
+confusionMatrix(table(rf_pred, mushrooms$type[-train_idx]), positive = "1")
+
+print(paste("Linear regression training time =", lr_train_time))
+print(paste("Random forest training time =", rf_train_time))
+```
