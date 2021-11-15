@@ -9,7 +9,7 @@ output:
 bibliography: sources.bib
 ---
 
-```{r setup}
+```{r, setup, include=FALSE}
 library("caret")
 library("curl")
 library("randomForest")
@@ -85,7 +85,24 @@ mushrooms <- raw_data %>%
     na.exclude
 ```
 
+Upon execution of this code, the mushroom data set is usable for both linear
+regression and random forest classifiers.
+
 ## Establishing Training vs. Test Data
+
+Splitting the mushroom data set into separate training and test sets allows us
+to build and train models independently of the data used to validate their
+performance. Without a train/test split, we have less confidence that our model
+generalizes to data it has not seen. For the purposes of this analysis, we 
+divide the mushroom data set such that 70 percent of our samples are the
+training set, and the remaining 30 percent are the test set.
+
+Prior to splitting the data set, we assign a static random seed via the
+`set.seed` function. This makes our results reproducible across multiple
+executions by seeding R's random number generator with a known state before
+performing operations that require randomness (e.g., randomly sampling the 
+whole data set for training data).
+
 ```{r}
 # Set up training data with a 70/30 split
 set.seed(1)
@@ -94,6 +111,10 @@ train_idx <- sample(nrow(mushrooms), num_train)
 train_data <- mushrooms[train_idx, ]
 test_data <- mushrooms[-train_idx, ]
 ```
+
+The mushroom data set is now ingested, transformed, and prepared for analysis.
+In the proceeding section, we build classifiers that label mushrooms as either
+"edible" or "poisonous".
 
 # Edibility Classifier Models
 
