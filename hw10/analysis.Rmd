@@ -1,7 +1,7 @@
 ---
 title: "DATA607 - Week 10 Homework"
 author: "Mike Dehn"
-date: "11/18/2021"
+date: "11/17/2021"
 output:
   pdf_document:
     latex_engine : pdflatex
@@ -19,19 +19,26 @@ library("tidyverse")
 
 # Introduction
 
+Determining which mushrooms are edible versus poisonous is an important 
+survival skill for those who find themselves searching for food in the 
+wilderness. In this study, we build logistic regression and random forest
+models that assess the edibility of various mushroom species based on several
+key characteristics. Both models have high classification performance, with
+logistic regression slightly outperforming random forest.
+
 # The Mushroom Data Set
 
 The Mushroom Data Set is a collection of mushroom characteristics originally
-described in The Audubon Society Field Guide to North American Mushrooms. 
-[@audobon_guide] These records contain hypothetical samples of over 8,000 
+described in The Audubon Society Field Guide to North American Mushrooms
+[@audobon_guide]. These records contain hypothetical samples of over 8,000 
 individual mushrooms, and include features such as the mushroom shape, color,
 and habitat. All features in the data set are categorical. Each mushroom is
 labeled as either "edible" or "poisonous".
 
 The data set used in this study is derived from the Machine Learning Repository
-maintained by the University of California, Irvine. [@Dua:2019] The data set 
+maintained by the University of California, Irvine [@Dua:2019]. The data set 
 is directly downloaded as part of this paper from an Amazon Web Services (AWS)
-S3 bucket. [@mushroom_data]
+S3 bucket [@mushroom_data].
 
 ## Acquiring Data
 
@@ -40,7 +47,7 @@ R package. The data are stored in a Comma-Separated Value (CSV) file with
 comma delimiters. Thus, the data are easily ingested using the `read_csv`
 function provided by the `tidyverse` package.
 
-```{r}
+```{r, message=FALSE}
 connection <- curl::curl(
     "https://s3.amazonaws.com/notredame.analytics.data/mushrooms.csv")
 raw_data <- read_csv(connection)
@@ -160,7 +167,7 @@ data set.
 ```{r, include=FALSE}
 Rprof()
 ```
-```{r}
+```{r, message=FALSE}
 # Build logistic regression model and collect profiling info
 lr_model <- glm(type ~ ., data = train_data, family = "binomial")
 ```
@@ -182,64 +189,185 @@ if $p(poisonous) < 0.5$, otherwise, we output a label of "1" (i.e., poisonous).
 
 ```{r}
 # Make predictions with logisitic regression model
-lr_pred <- predict(lr_model, test_data, type = "response")
-lr_pred <- ifelse(lr_pred < 0.5, "0", "1")
+lr_pred_probs <- predict(lr_model, test_data, type = "response")
+lr_pred <- ifelse(lr_pred_probs < 0.5, "0", "1")
 ```
 
 The confusion matrix below represents the results of our classification against
 the test data set.
 
-```{r}
+```{r, echo=FALSE}
 confusionMatrix(table(lr_pred, mushrooms$type[-train_idx]), positive = "1")
 ```
 
 The ROC curve below provides a graphical representation of the classifier's
 performance.
 
-```{r}
-lr_pred_roc <- prediction(as.numeric(lr_pred),
-                          as.numeric(mushrooms$type[-train_idx]))
+```{r, echo=FALSE}
+lr_pred_roc <- prediction(lr_pred_probs, mushrooms$type[-train_idx])
 roc <- performance(lr_pred_roc, "tpr", "fpr")
 plot(roc, colorize = FALSE, lwd = 2, col = "blue", main = "ROC curve")
 lines(c(0:100) / 100, c(0:100) / 100, lty = 2)
+auc <- performance(lr_pred_roc, measure = "auc")
+auc <- auc@y.values[[1]]
+text(0.85, 0.1, "AUC=", cex = 1)
+text(0.95, 0.1, round(auc, 3), cex = 1)
 ```
 
 ## Random Forest
 
+The random forest classifier is a model that uses an ensemble of decision trees
+to classify data records based on comparison of features against. Each node in
+a decision tree represents a feature to evaluate against a boundary condition,
+and each edge represents a transition from one decision state to another. Leaf
+nodes in the tree represent a final decision and result in a classification
+decision.
+
+A random forest consists of $n$ decision trees trained against the same data
+set. It is an ensemble classifier, meaning that the ultimate classification
+decision is made based on votes from the constituent decision tree models. A
+random forest very often outperforms decision trees in classification tasks, so
+we use this algorithm instead of a decision tree for classifying mushrooms.
+
+One major benefit of decision tree and random forest classifiers is that it is
+straightforward to determine and represent the most important features in a
+model. Specifically, we can use the Gini importance measure which describes the
+mean decrease in impurity after evaluating a feature. A higher Gini importance
+can be thought of as higher predictive power of a feature.
+
 ### Building the Model
-```{r}
-# Build random forest model and collect profiling info
+
+The `randomForest` function provided by R contains an implementation of the 
+random forest algorithm. We provide the mushroom data that we ingested and
+cleaned earlier in this report to the `randomForest` function, providing it 
+only with our training data set. The random forest classifier is configured
+to predict the `type` label for the mushroom, which was converted to a binary
+value in our previous transformations. Ultimately, the model provides a
+decision as to whether a mushroom is poisonous or edible.
+
+The code snippet below trains our random forest model for the mushroom data set.
+
+```{r, include=FALSE}
 Rprof()
+```
+```{r}
+# Build random forest model
 rf_model <- randomForest(type ~ ., data = train_data)
+```
+```{r, include=FALSE}
 Rprof(NULL)
 rf_train_time <- summaryRprof()$by.total$total.time[1]
 ```
 
 ### Making Predictions
+
+The random forest model we built is now able to perform classification of
+mushrooms on our test data set. To exercise the model, we use the `predict`
+function provided by R. Since our random forest model is designed to provide
+decisions, we do not have to perform a translation of the model's output, we
+can use it as-is. For the output of the random forest model, a label of "0"
+indicates the mushroom is edible, while a label of "1" indicates it is
+poisonous.
+
 ```{r}
 # Make predictions with random forest model
 rf_pred <- predict(rf_model, test_data, type = "class")
+```
 
+The confusion matrix below represents the results of our classification against
+the test data set.
+
+```{r, echo=FALSE}
 confusionMatrix(table(rf_pred, mushrooms$type[-train_idx]), positive = "1")
 ```
 
-```{r}
+The ROC curve below provides a graphical representation of the classifier's
+performance.
+
+```{r, echo=FALSE}
 rf_pred_roc <- predict(rf_model, newdata = test_data, type = "prob")
 rf_pred_roc <- prediction(rf_pred_roc[, 2],
                           mushrooms$type[-train_idx])
 roc <- performance(rf_pred_roc, "tpr", "fpr")
 plot(roc, colorize = FALSE, lwd = 2, col = "blue", main = "ROC curve")
 lines(c(0:100) / 100, c(0:100) / 100, lty = 2)
+auc <- performance(rf_pred_roc, measure = "auc")
+auc <- auc@y.values[[1]]
+text(0.85, 0.1, "AUC = ", cex = 1)
+text(0.95, 0.1, round(auc, 3), cex = 1)
 ```
 
 # Comparative Analysis
 
+We evaluate the performance of the linear regression and random forest
+classifiers with respect to their training time and performance in classifying
+mushrooms correctly.
+
 ## Runtime
-```{r}
-print(paste("Linear regression training time =", lr_train_time))
-print(paste("Random forest training time =", rf_train_time))
-```
+
+In training each of the models, we use the `Rprof` profiler to collect runtime
+information. The runtime performance is summarized in the table below.
+
+$$
+{
+\centering
+\begin{tabular}{|c|c|}
+  \hline
+  \textbf{Model} & \textbf{Training Time (sec)} \\ \hline
+  Logistic Regression & `r lr_train_time` \\ \hline
+  Random Forest & `r rf_train_time` \\ \hline
+\end{tabular}
+}
+$$
+
+From the runtimes shown, we conclude that the linear regression classifier is
+training time is significantly faster than that of the random forest classifier.
+It is important to note that the random forest classifier training time is 
+variable based on the number of decision trees in the forest. However, the
+runtime difference between the logistic regression classifier
+(`r lr_train_time` seconds) and the random forest classifier
+(`r rf_train_time` seconds) is large enough that we can conclude the logistic
+regression classifier is the superior choice in this respect.
 
 ## Classifier Performance
 
+As shown in previous sections, the performance of the logistic regression and
+random forest classifiers is very similar. To summarize some key performance
+characteristics:
+
+$$
+{
+\centering
+\begin{tabular}{|c|c|c|}
+  \hline
+  \textbf{Model} & \textbf{Accuracy} & \textbf{Sensitivity} \\
+  \hline
+  Logistic Regression & 0.9897 & 0.9787 \\ \hline
+  Random Forest & 0.9889 & 0.9770 \\ \hline
+\end{tabular}
+}
+$$
+
+As we can see, the results for both the accuracy and sensitivity are remarkably
+similar across the logistic regression and random forest classifiers. However, 
+the logistic regression classifier has higher accuracy and sensitivity.
+
+This is further confirmed when viewing the ROC curves presented in previous 
+sections. Both ROC curves for the classifiers have a very high area under the 
+curve, 0.999 for logistic regression, and 0.995 for random forest.
+
 # Conclusion
+
+Given the above results, we conclude that the logistic regression classifier is
+the superior model for classifying mushrooms as either edible or poisonous. The
+logistic regression classifier has a much shorter training time (less than 1
+second), while the random forest classifier requires much longer. 
+
+Further, the logistic regression classifier has a higher accuracy and
+sensitivity. In this context, higher sensitivity corresponds to fewer mistakes 
+where mushrooms are misclassified as edible when they are actually poisonous.
+
+Given these factors, we conclude that the logistic regression model is
+preferable since it is both faster to train and safer to use.
+
+# References
