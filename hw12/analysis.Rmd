@@ -1,0 +1,119 @@
+---
+title: "DATA607 - Week 12 Homework"
+author: "Mike Dehn"
+date: "12/08/2021"
+output:
+  pdf_document:
+    latex_engine : pdflatex
+    number_sections: true
+---
+
+```{r, setup, include=FALSE}
+library(gamair)
+data(chicago)
+X <- chicago
+head(X)
+X1 <- na.omit(X)
+X1 <- scale(X1)
+dim(X1)
+head(X1)
+chi.omit <- 200
+set.seed(1234)
+in.row <- sample(719, chi.omit)
+in.col <- sample(1:7, chi.omit, replace = TRUE)
+X1.omit <- X1
+index.omit <- cbind(in.row, in.col)
+X1.omit[index.omit] <- NA
+# Your missing data matrix is then X1.omit
+```
+
+# Iterative Matrix Completion Implementation
+
+```{r}
+Mat.Complete <- function(X, thresh, maxiter) {
+  # Calculate the mean of each column so it can be used for initialization of
+  # the imputed matrix
+  x_bar <- colMeans(X, na.rm = TRUE)
+
+  # Copy the original matrix into x_hat and replace all NA values with the mean
+  # of its column
+  x_hat <- X
+  for (i in 1:ncol(X)) {
+    x_hat[is.na(x_hat[, i]), i] <- x_bar[i]
+  }
+
+  # Helper variable that stores which matrix elements are missing
+  ismiss <- is.na(X)
+
+  # Initial state of the mean squared error used by the algorithm for tracking
+  # improvement per iteration
+  mssold <- mean((scale(X, x_bar, FALSE)[!ismiss])^2)
+  mss0 <- mean(X[!ismiss]^2)
+
+  # Key values that will track the loop conditions
+  rel_err <- 1
+  iter <- 0
+
+  # Loop until our relative error is below the threshold value, or we reach the
+  # maximum number of permitted iterations
+  while (rel_err > thresh && iter < maxiter) {
+    iter <- iter + 1
+
+    # Algorithm 12.1, 2a - Perform principal component analysis (PCA) on the
+    # approximation matrix. The resulting structure will provide matrix A and
+    # matrix B in fields $x and $rotation, respectively.
+    # NOTE: We use rank. = 1 for parity with the example in Section 12.5.2
+    x_pca <- prcomp(x_hat, center = FALSE, rank. = 1)
+
+    # Algorithm 12.1, 2b - Update approximation matrix to store a_i1 * b_i1 for
+    # each of the missing elements in the original matrix
+    x_app <- x_pca$x %*% t(x_pca$rotation)
+    x_hat[ismiss] <- x_app[ismiss]
+
+    # Algorithm 12.1, 2c - Calculate mean squared error for this iteration and
+    # update the relative error
+    mss <- mean(((X - x_app)[!ismiss])^2)
+    rel_err <- (mssold - mss) / mss0
+    mssold <- mss
+
+    # Report on current state
+    cat("Iter:", iter, "MSS:", mss, "Rel. Err:", rel_err, "\n")
+  }
+
+  # If we stopped due to number of iterations, warn the user
+  if (rel_err > thresh) {
+    warning("solution did not converge within permitted iterations")
+  }
+
+  # Return a list containing the completed matrix, the number of iterations,
+  # and the relative error of the final iteration
+  list(x_hat, iter, rel_err)
+}
+```
+
+# Matrix Completion with `Mat.Complete`
+
+```{r}
+# Invoke matrix completion function on incomplete data matrix
+thresh <- 1e-7
+maxiter <- 30
+x_imputed <- Mat.Complete(X1.omit, thresh, maxiter)
+x_imputed[[1]]
+```
+
+# Matrix Completion with `softImpute`
+
+```{r}
+library(softImpute)
+
+# Invoke softImpute matrix completion on incomplete data matrix. Use settings
+# that best approximate what we did with the homebrew implementation
+x_softImpute <- softImpute(X1.omit, thresh = thresh, maxit = maxiter,
+                           trace.it = TRUE, type = "svd", rank.max = 1)
+```
+
+Based on the results above, we conclude that our original implementation of
+iterative matrix completion has roughly equivalent output to that of the
+`softImpute` package. Both algorithms complete with approximately the same
+number of iterations and have similar relative errors upon their final
+iteration.
